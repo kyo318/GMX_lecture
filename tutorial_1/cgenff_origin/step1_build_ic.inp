@@ -5,9 +5,9 @@
 ! Read topology and parameter files
 stream toppar.str
 
-stream toppar_all36_synthetic_polymer_1015_1900.str
+stream toppar_my_molecule.str
 ! Generate segment
-read sequence TEST 1
+read sequence CABZ 1
 generate L1 first none last none setup warn
 
 ! Generate internal coordinates

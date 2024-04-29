@@ -19,7 +19,7 @@ kcal2kJ = 4.184
 comment = '!'
 
 if len(sys.argv) != 3:
-    print "useage: psf2itp.py topparPath psfFile"
+    print("useage: psf2itp.py topparPath psfFile")
     exit()
 
 #-------------------------------------------#
@@ -35,7 +35,7 @@ for filename in os.listdir(path):
         parFiles.append(path+'/'+filename)
 
 if len(parFiles) == 0:
-    print "Fatal error: incorrect toppar path"
+    print("Fatal error: incorrect toppar path")
     exit()
 
 index2type     = {}
@@ -370,7 +370,7 @@ for line in psfFile:
                 type2charge[type] = atomchrg
 
         if readpsf == 'bond':
-            bondNumber = len(segments)/2
+            bondNumber = int(len(segments)/2)
             for i in range(bondNumber):
                 atom1 = int(segments[2*i+0])
                 atom2 = int(segments[2*i+1])
@@ -386,7 +386,7 @@ for line in psfFile:
                         break
 
         if readpsf == 'angle':
-            angleNumber = len(segments)/3
+            angleNumber = int(len(segments)/3)
             for i in range(angleNumber):
                 atom1 = int(segments[3*i+0])
                 atom2 = int(segments[3*i+1])
@@ -403,7 +403,7 @@ for line in psfFile:
                         break
 
         if readpsf == 'dihedral':
-            dihedralNumber = len(segments)/4
+            dihedralNumber = int(len(segments)/4)
             for i in range(dihedralNumber):
                 atom1 = int(segments[4*i+0])
                 atom2 = int(segments[4*i+1])
@@ -422,7 +422,7 @@ for line in psfFile:
                         break
 
         if readpsf == 'improper':
-            improperNumber = len(segments)/4
+            improperNumber = int(len(segments)/4)
             for i in range(improperNumber):
                 atom1 = int(segments[4*i+0])
                 atom2 = int(segments[4*i+1])
@@ -441,7 +441,7 @@ for line in psfFile:
                         break
 
         if readpsf == 'group':
-            groupNumber = len(segments)/3
+            groupNumber = int(len(segments)/3)
             for i in range(groupNumber):
                 atom1 = int(segments[3*i+0]) + 1
                 for imol in range(len(mol)):
@@ -673,7 +673,7 @@ for dihedral in type2dihedral:
     if writeitp:
         multNumber = type2mult[type1,type2,type3,type4]
         if multNumber >= 1:
-            for m in range(multNumber):
+            for m in range(int(multNumber)):
                 phi  = type2dihedral[type1,type2,type3,type4][m*3]
                 cp   = type2dihedral[type1,type2,type3,type4][m*3+1]
                 mult = type2dihedral[type1,type2,type3,type4][m*3+2]

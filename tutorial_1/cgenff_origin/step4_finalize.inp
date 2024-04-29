@@ -5,16 +5,15 @@
 ! Read topology and parameter files
 stream toppar.str
 
-stream toppar_all36_synthetic_polymer_1015_1900.str
+stream toppar_my_molecule.str
 ! Generate segment
 
-set nmer = 5
 !SSRRSSRRR
 read sequence card 
 *test
 *
 1
-TEST !NAMS NAMS NAMS NAMS NAMS NAMS NAMS NAMS NAMS NAMS NAMS NAMS NAMS NAMS NAMS NAMS NAMS NAMS NAMS 
+CABZ 
 generate U1 first none last none setup
 
 coor print sele ( .not INIT ) end
@@ -23,14 +22,10 @@ ic param
 ic seed 1 C1 1 C2 1 C3
 ic build
 
-open write card unit 10 name test.pdb
+open write card unit 10 name final.pdb
 write coor pdb  unit 10
-mini SD   nstep 50 nprint 5
-open write card unit 10 name test_em.pdb
-write coor pdb  unit 10
-open write card unit 10 name parameter.psf
+open write card unit 10 name final.psf
 write psf unit 10 card
-
-open write unit 10 card name test_em.crd
+open write unit 10 card name final.crd
 write coor unit 10 card
 close unit 10
