@@ -1,0 +1,26 @@
+* Reads the IPEN residue from the topology file and writes a pdb consisting
+* of a single IPEN molecule
+*
+
+! Read topology and parameter files
+stream toppar.str
+
+stream toppar_all36_synthetic_polymer_1015_1900.str
+! Generate segment
+read sequence TEST 1
+generate L1 first none last none setup warn
+
+! Generate internal coordinates
+ic generate
+ic param all
+ic print
+
+! Generate cartesian coordinates
+ic seed	 L1 1 C1  L1 1 C2  L1 1 C3
+ic build
+
+! Write coordinates to PDB
+write coor pdb name L1_build.pdb
+
+
+

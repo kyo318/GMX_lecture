@@ -1,0 +1,30 @@
+# This file was created Mon Apr 29 13:16:53 2024
+# Created by:
+#                      :-) GROMACS - gmx energy, 2024.1 (-:
+# 
+# Executable:   /usr/local/gromacs/bin/gmx
+# Data prefix:  /usr/local/gromacs
+# Working dir:  /Users/kyo/PJT/gmx_tutorial_with_charmm/tutorial_1/substrate
+# Command line:
+#   gmx energy -f eq.edr
+# gmx energy is part of G R O M A C S:
+#
+# S  C  A  M  O  R  G
+#
+@    title "GROMACS Energies"
+@    xaxis  label "Time (ps)"
+@    yaxis  label "(nm)"
+@TYPE xy
+@ view 0.15, 0.15, 0.75, 0.85
+@ legend on
+@ legend box on
+@ legend loctype view
+@ legend 0.78, 0.8
+@ legend length 2
+@ s0 legend "Box-X"
+    0.000000    5.000000
+    2.000000    5.058084
+    4.000000    5.082575
+    6.000000    5.091916
+    8.000000    5.096013
+   10.000000    5.095209

@@ -1,0 +1,36 @@
+;define                  = -DPOSRES -DPOSRES_FC_BB=4000.0 -DPOSRES_FC_SC=2000.0 -DPOSRES_FC_LIPID=1000.0 -DDIHRES -DDIHRES_FC=1000.0
+integrator              = md
+dt                      = 0.001   ;ps = 1fs 
+nsteps                  = 50000  ;total simulation time = 50 ps 
+nstxtcout               = 5000    ; 20 frame 
+nstvout                 = 5000    ; 20 frame
+nstfout                 = 5000    ; 20 frame
+nstcalcenergy           = 100 
+nstenergy               = 1000
+nstlog                  = 1000
+;
+cutoff-scheme           = Verlet
+nstlist                 = 20
+rlist                   = 1.2
+vdwtype                 = Cut-off
+vdw-modifier            = Force-switch
+rvdw_switch             = 1.0
+rvdw                    = 1.2
+coulombtype             = PME
+rcoulomb                = 1.2
+;
+tcoupl                  = berendsen
+tc_grps                 = SYSTEM ;SOLU MEMB SOLV
+tau_t                   = 1.0    ;1.0 1.0 1.0
+ref_t                   = 400    ;310 310 310
+;
+constraints             = h-bonds
+constraint_algorithm    = LINCS
+;
+nstcomm                 = 100
+comm_mode               = linear
+comm_grps               = SYSTEM ;SOLU_MEMB SOLV
+;
+gen-vel                 = yes
+gen-temp                = 400
+gen-seed                = -1

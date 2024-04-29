@@ -1,0 +1,45 @@
+# This file was created Mon Apr 29 14:30:07 2024
+# Created by:
+#                      :-) GROMACS - gmx energy, 2024.1 (-:
+# 
+# Executable:   /usr/local/gromacs/bin/gmx
+# Data prefix:  /usr/local/gromacs
+# Working dir:  /Users/kyo/PJT/gmx_tutorial_with_charmm/tutorial_1/substrate
+# Command line:
+#   gmx energy -f compressed.edr
+# gmx energy is part of G R O M A C S:
+#
+# Giant Rising Ordinary Mutants for A Clerical Setup
+#
+@    title "GROMACS Energies"
+@    xaxis  label "Time (ps)"
+@    yaxis  label "(kg/m^3)"
+@TYPE xy
+@ view 0.15, 0.15, 0.75, 0.85
+@ legend on
+@ legend box on
+@ legend loctype view
+@ legend 0.78, 0.8
+@ legend length 2
+@ s0 legend "Density"
+    0.000000  900.928162
+    2.000000  902.915710
+    4.000000  908.253601
+    6.000000  909.340027
+    8.000000  909.803406
+   10.000000  912.727600
+   12.000000  914.655579
+   14.000000  914.587952
+   16.000000  916.772949
+   18.000000  918.528870
+   20.000000  913.982117
+   22.000000  915.487305
+   24.000000  913.621643
+   26.000000  915.278809
+   28.000000  912.254333
+   30.000000  914.901855
+   32.000000  914.595093
+   34.000000  911.306458
+   36.000000  909.206909
+   38.000000  908.163147
+   40.000000  906.962463

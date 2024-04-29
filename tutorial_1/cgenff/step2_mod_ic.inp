@@ -1,0 +1,36 @@
+* Reads the IPEN residue from the topology file and writes a pdb consisting
+* of a single IPEN molecule
+*
+
+! Read topology and parameter files
+stream toppar.str
+
+stream toppar_all36_synthetic_polymer_1015_1900.str
+! Generate segment
+
+set nmer = 5
+!SSRRSSRRR
+read sequence card 
+*test
+*
+1
+TEST !NAMS NAMS NAMS NAMS NAMS NAMS NAMS NAMS NAMS NAMS NAMS NAMS NAMS NAMS NAMS NAMS NAMS NAMS NAMS 
+generate U1 first none last none setup
+
+coor print sele ( .not INIT ) end
+
+ic param
+ic seed 1 C1 1 C2 1 C3
+ic build
+
+open write card unit 10 name test.pdb
+write coor pdb  unit 10
+mini SD   nstep 50 nprint 5
+open write card unit 10 name test_em.pdb
+write coor pdb  unit 10
+open write card unit 10 name parameter.psf
+write psf unit 10 card
+
+open write unit 10 card name test_em.crd
+write coor unit 10 card
+close unit 10
