@@ -1,0 +1,53 @@
+set nsolv = 1712
+if sprad .eq. 4 then
+    calc Lbox = 49.5
+endif
+if sprad .eq. 5 then
+    calc Lbox = 62.0
+endif
+if sprad .eq. 6 then
+    calc Lbox = 74.4
+endif
+if sprad .eq. 7 then
+    calc Lbox = 86.8
+endif
+if sprad .eq. 8 then
+    calc Lbox = 99.3
+endif
+if sprad .eq. 9 then
+    calc Lbox = 111.7
+endif
+if sprad .eq. 10 then
+    calc Lbox = 123.9
+endif
+if sprad .eq. 11 then
+    calc Lbox = 136.4
+endif
+if sprad .eq. 12 then
+    calc Lbox = 148.8
+endif
+if sprad .eq. 13 then
+    calc Lbox = 161.1
+endif
+if sprad .eq. 14 then
+    calc Lbox = 173.6
+endif
+if sprad .eq. 15 then
+    calc Lbox = 185.8
+endif
+if sprad .eq. 16 then
+    calc Lbox = 198.2
+endif
+if sprad .eq. 17 then
+    calc Lbox = 210.4
+endif
+if sprad .eq. 18 then
+    calc Lbox = 222.7
+endif
+if sprad .eq. 19 then
+    calc Lbox = 234.9
+endif
+if sprad .eq. 20 then
+    calc Lbox = 247.1
+endif
+

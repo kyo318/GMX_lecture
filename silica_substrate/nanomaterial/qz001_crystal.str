@@ -1,0 +1,39 @@
+! y axis
+if iy .ne. 1 then
+    calc jsum = @isum - 1
+    coor trans ydir @Ly select segid @type .and. resid @isum end
+    patch SIOY15 @type @jsum  @type @isum
+endif
+
+! x axis
+if ix .ne. 1 then
+    calc ksum = @isum - @Ny
+    coor trans xdir @Lx select segid @type .and. resid @isum end
+    patch SIOX11 @type @ksum  @type @isum
+endif
+
+! diagonal_in the same layer
+if ix .ne. 1 then
+    if iy .ne. 1 then
+        calc lsum = @isum - @Ny - 1
+        patch SIOD3 @type @lsum  @type @isum
+    endif
+endif
+
+! z axis_in same column and two layer
+if iz .ne. 1 then
+    calc msum = @isum - @Nxy
+    coor trans zdir @Lz select segid @type .and. resid @isum end
+    patch SIOZ1 @type @msum  @type @isum
+    patch SIOZ3 @type @msum  @type @isum
+endif
+
+! diagonal_ between two layer in z_axis
+if ix .ne. 1 then
+    if iz .ne. 1 then
+        calc nsum = @isum - @Nxy - @Ny
+        patch SIOZ2 @type @nsum  @type @isum
+        patch SIOZ4 @type @nsum  @type @isum
+    endif
+endif
+

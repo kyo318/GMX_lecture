@@ -1,0 +1,547 @@
+set nmodi = 0
+if xyzpbc .eq. yes goto escion
+label reexam !when pbc = no, it need one more step for removing danlging oxygen and silicon
+
+calc Nxy = @NX * @NY
+set iz = 1
+label dosphz1
+   calc izp = ( @iz - 1 ) * @Nxy
+
+   set ix = 1
+   label dosphx1
+      calc ixyp = @izp + ( @ix - 1 ) * @NY
+
+      set iy = 1
+      label dosphy1
+         calc isum = @ixyp + @iy
+
+         ! nanomaterial specific terminal patch(es)
+         calc iox = 1
+         label deloxy
+            define ox sele resid @isum .and. type o@iox end
+            define dox sele .bonded. ox end
+            calc nox = ?nsel
+            if nox .ne. 2 then
+               dele atom sele ox end
+            endif
+            incr iox by 1
+         if iox .le. @nofo goto deloxy
+
+      increase iy by 1
+      if iy .le. @Ny goto dosphy1
+
+   increase ix by 1
+   if ix .le. @Nx goto dosphx1
+
+increase iz by 1
+if iz .le. @Nz goto dosphz1
+
+
+
+calc Nxy = @NX * @NY
+set iz = 1
+label dosphz2
+   calc izp = ( @iz - 1 ) * @Nxy
+
+   set ix = 1
+   label dosphx2
+      calc ixyp = @izp + ( @ix - 1 ) * @NY
+
+      set iy = 1
+      label dosphy2
+         calc isum = @ixyp + @iy
+
+         ! delete oxygen with dangling bond
+         calc isi = 1
+         label delsi
+            define silicon sele resid @isum .and. type si@isi end
+            define dox sele TYPE O* .and. .bonded. silicon end
+            calc nox = ?nsel
+            if nox .eq. 1 then
+               dele atom sele silicon end
+            endif
+            incr isi by 1
+         if isi .le. @nofsi goto delsi
+
+      increase iy by 1
+      if iy .le. @Ny goto dosphy2
+
+   increase ix by 1
+   if ix .le. @Nx goto dosphx2
+
+increase iz by 1
+if iz .le. @Nz goto dosphz2
+
+
+calc Nxy = @NX * @NY
+set iz = 1
+label dosphz3
+   calc izp = ( @iz - 1 ) * @Nxy
+
+   set ix = 1
+   label dosphx3
+      calc ixyp = @izp + ( @ix - 1 ) * @NY
+
+      set iy = 1
+      label dosphy3
+         calc isum = @ixyp + @iy
+
+         ! nanomaterial specific terminal patch(es)
+         calc iox = 1
+         label deloxy2
+            define ox sele resid @isum .and. type o@iox end
+            define dox sele .bonded. ox end
+            calc nox = ?nsel
+            if nox .ne. 2 then
+               dele atom sele ox end
+            endif
+            incr iox by 1
+         if iox .le. @nofo goto deloxy2
+
+      increase iy by 1
+      if iy .le. @Ny goto dosphy3
+
+   increase ix by 1
+   if ix .le. @Nx goto dosphx3
+
+increase iz by 1
+if iz .le. @Nz goto dosphz3
+
+if pbc .eq. no then
+    if nmodi .le. 2 then
+       calc nmodi = @nmodi + 1
+       goto reexam
+    endif
+endif
+
+!
+!silanol capping
+!
+calc bxhalf = @A / 2
+calc byhalf = @B / 2
+calc bzhalf = @C / 2
+
+calc cnt = 0
+set iz = 1
+label dozcap
+    calc izp = ( @iz - 1 ) * @Nxy
+
+    set ix = 1
+    label doxcap
+        calc ixyp = @izp + ( @ix - 1 ) * @NY
+
+        set iy = 1
+        label doycap
+            calc isum = @ixyp + @iy
+            calc isi = 1
+            label siol
+                define silicon sele resid @isum .and. type si@{isi} end
+                define cox sele type O* .and. .bonded. silicon end
+                calc nox = ?nsel
+                if nox .eq. 3 then
+                    calc cnt = @cnt + 1
+                    calc k = 1
+                    quick @type @isum si@{isi}
+                    calc six = ?xval
+                    calc siy = ?yval
+                    calc siz = ?zval
+                    label loop
+                        coor stat sele cox .subset. @k end
+                        set at@k = ?seltype
+                        set resi@k = ?selresi
+                        calc at@{k}x = ?xave
+                        calc at@{k}y = ?yave
+                        calc at@{k}z = ?zave
+                        calc vec@{k}x = @{at@@{k}x} - @six
+                        calc vec@{k}y = @{at@@{k}y} - @siy
+                        calc vec@{k}z = @{at@@{k}z} - @siz
+                        if vec@{k}x .gt. @bxhalf calc vec@{k}x = @{vec@@{k}x} - @A
+                        if vec@{k}y .gt. @byhalf calc vec@{k}y = @{vec@@{k}y} - @B
+                        if vec@{k}z .gt. @bzhalf calc vec@{k}z = @{vec@@{k}z} - @C
+                        if vec@{k}x .lt. -@bxhalf calc vec@{k}x = @{vec@@{k}x} + @A
+                        if vec@{k}y .lt. -@byhalf calc vec@{k}y = @{vec@@{k}y} + @B
+                        if vec@{k}z .lt. -@bzhalf calc vec@{k}z = @{vec@@{k}z} + @C
+                        incr k by 1
+                    if k .le. @nox goto loop
+                    define temp1 sele resid @resi1 .and. type @at1 end
+                    define temp sele .bonded. temp1 end
+                    calc snobond = ?nsel
+                    calc j = 1
+                    label loop2
+                        coor stat sele temp .subset. @j end
+                        if ?seltype .ne. si@{isi} then
+                            set sat = ?seltype
+                            set sresi = ?selresi
+                        endif
+                        incr j by 1
+                    if j .le. @snobond goto loop2
+                    calc nvecx = - ( @vec1x + @vec2x + @vec3x )
+                    calc nvecy = - ( @vec1y + @vec2y + @vec3y )
+                    calc nvecz = - ( @vec1z + @vec2z + @vec3z )
+                    calc xpos = @nvecx + @six
+                    calc ypos = @nvecy + @siy
+                    calc zpos = @nvecz + @siz
+                    calc norm = sqrt(@nvecx * @nvecx + @nvecy * @nvecy + @nvecz * @nvecz)
+                    quick @type @sresi @{sat} @type @resi1 @{at1} @type @isum si@{isi} @type @resi2 @{at2}
+                    patch QZHS@{isi} @type @isum setup warn
+                    coor set xdir @xpos ydir @ypos zdir @zpos sele segid @type .and. resid @isum .and. type OS@{isi} end
+                    ic edit
+                       DIHED @type @resi1 @{at1}   @type @isum Si@{isi} @type @isum  OS@{isi} @type @isum HS@{isi} 160.0
+                       DISTD @type @isum OS@{isi}  @type @isum HS@{isi} 0.95 add
+                       ANGLE @type @isum SI@{isi}  @type @isum OS@{isi} @type @isum HS@{isi} 109.5 add
+                    end
+                endif
+                if nox .eq. 2 then
+                    calc cnt = @cnt + 2
+                    calc k = 1
+                    quick @type @isum si@{isi}
+                    calc six = ?xval
+                    calc siy = ?yval
+                    calc siz = ?zval
+                    label lpoh1
+                        coor stat sele cox .subset. @k end
+                        set at@k = ?seltype
+                        set resi@k = ?selresi
+                        calc at@{k}x = ?xave
+                        calc at@{k}y = ?yave
+                        calc at@{k}z = ?zave
+                        calc vec@{k}x = @{at@@{k}x} - @six
+                        calc vec@{k}y = @{at@@{k}y} - @siy
+                        calc vec@{k}z = @{at@@{k}z} - @siz
+                        if vec@{k}x .gt. @bxhalf calc vec@{k}x = @{vec@@{k}x} - @A
+                        if vec@{k}y .gt. @byhalf calc vec@{k}y = @{vec@@{k}y} - @B
+                        if vec@{k}z .gt. @bzhalf calc vec@{k}z = @{vec@@{k}z} - @C
+                        if vec@{k}x .lt. -@bxhalf calc vec@{k}x = @{vec@@{k}x} + @A
+                        if vec@{k}y .lt. -@byhalf calc vec@{k}y = @{vec@@{k}y} + @B
+                        if vec@{k}z .lt. -@bzhalf calc vec@{k}z = @{vec@@{k}z} + @C
+                        incr k by 1
+                    if k .le. @nox goto lpoh1
+                    calc xcrx = @{vec1y} * @{vec2z} - @{vec1z} * @{vec2y}
+                    calc ycrx = @{vec1z} * @{vec2x} - @{vec1x} * @{vec2z}
+                    calc zcrx = @{vec1x} * @{vec2y} - @{vec1y} * @{vec2x}
+                    calc crxnorm = sqrt(@xcrx * @xcrx + @ycrx * @ycrx + @zcrx * @zcrx)
+                    calc xcrx = @xcrx / @crxnorm
+                    calc ycrx = @ycrx / @crxnorm
+                    calc zcrx = @zcrx / @crxnorm
+                    calc xsum = - (@{vec1x} + @{vec2x})
+                    calc ysum = - (@{vec1y} + @{vec2y})
+                    calc zsum = - (@{vec1z} + @{vec2z})
+                    calc sumnorm = sqrt(@xsum * @xsum + @ysum * @ysum + @zsum * @zsum)
+                    calc xsum = @xsum / @sumnorm
+                    calc ysum = @ysum / @sumnorm
+                    calc zsum = @zsum / @sumnorm
+                    calc xpos1 = @xcrx + @xsum
+                    calc ypos1 = @ycrx + @ysum
+                    calc zpos1 = @zcrx + @zsum
+                    calc posnorm = sqrt(@xpos1 * @xpos1 + @ypos1 * @ypos1 + @zpos1 * @zpos1)
+                    calc xpos1 = @xpos1 / @posnorm * 1.65
+                    calc ypos1 = @ypos1 / @posnorm * 1.65
+                    calc zpos1 = @zpos1 / @posnorm * 1.65
+                    calc posnorm = sqrt(@xpos1 * @xpos1 + @ypos1 * @ypos1 + @zpos1 * @zpos1)
+                    calc xpos2 = -@xcrx + @xsum
+                    calc ypos2 = -@ycrx + @ysum
+                    calc zpos2 = -@zcrx + @zsum
+                    calc posnorm = sqrt(@xpos2 * @xpos2 + @ypos2 * @ypos2 + @zpos2 * @zpos2)
+                    calc xpos2 = @xpos2 / @posnorm * 1.65
+                    calc ypos2 = @ypos2 / @posnorm * 1.65
+                    calc zpos2 = @zpos2 / @posnorm * 1.65
+                    calc posnorm = sqrt(@xpos2 * @xpos2 + @ypos2 * @ypos2 + @zpos2 * @zpos2)
+
+                    define temp1 sele resid @resi1 .and. type @at1 end
+                    define temp sele .bonded. temp1 end
+                    calc snobond = ?nsel
+                    calc j = 1
+                    label lpoh2
+                        coor stat sele temp .subset. @j end
+                        if ?seltype .ne. si@{isi} then
+                            set sat = ?seltype
+                            set sresi = ?selresi
+                        endif
+                        incr j by 1
+                    if j .le. @snobond goto lpoh2
+                    calc xpos1 = @xpos1 + @six
+                    calc ypos1 = @ypos1 + @siy
+                    calc zpos1 = @zpos1 + @siz
+                    quick @type @sresi @{sat} @type @resi1 @{at1} @type @isum si@{isi} @type @resi2 @{at2}
+                    patch QZHD@{isi} @type @isum setup warn
+                    coor set xdir @xpos1 ydir @ypos1 zdir @zpos1 sele segid @type .and. resid @isum .and. type OD@{isi}1 end
+                    calc xpos2 = @xpos2 + @six
+                    calc ypos2 = @ypos2 + @siy
+                    calc zpos2 = @zpos2 + @siz
+                    coor set xdir @xpos2 ydir @ypos2 zdir @zpos2 sele segid @type .and. resid @isum .and. type OD@{isi}2 end
+
+                    IC EDIT
+                        DIHED @type @resi1 @at1   @type @isum Si@{isi} @type @isum OD@{isi}1 @type @isum HD@{isi}1 -20.0
+                        DISTD @type @isum OD@{isi}1 @type @isum HD@{isi}1 0.95 add
+                        ANGLE @type @isum SI@{isi} @type @isum OD@{isi}1 @type @isum HD@{isi}1 109.5 add
+
+                        DIHED @type @resi1 @at1   @type @isum Si@{isi} @type @isum  OD@{isi}2 @type @isum HD@{isi}2 -20.0
+                        DISTD @type @isum OD@{isi}2 @type @isum HD@{isi}2 0.95 add
+                        ANGLE @type @isum SI@{isi} @type @isum OD@{isi}2 @type @isum HD@{isi}2 109.5 add
+                        !DIHED @type @isum OD@{isi}1 @type @resi1 @at1 @type @isum *si@{isi} @type @isum OD@{isi}2 @dang
+                        !DIHED @type @isum OD@{isi}1 @type @resi2 @at2 @type @isum *si@{isi} @type @isum OD@{isi}2 -@dang
+                    END
+                endif
+                incr isi by 1
+            if isi .le. @nofsi goto siol
+
+        increase iy by 1
+        if iy .le. @Ny goto doycap
+
+    increase ix by 1
+    if ix .le. @Nx goto doxcap
+
+increase iz by 1
+if iz .le. @Nz goto dozcap
+
+if cnt .ne. 0 then
+   ic build
+endif
+
+if ionpnt .eq. 0 goto escion
+
+define surfoh sele type H* end
+calc noh = ?nsel
+set segname = ?selsegi
+calc nna = int( @noh * @ionpnt / 100 )
+if nna .eq. 0 goto escion
+define surfo sele type OS* .or. type OD* end
+define surfsi sele type SI* .and. .bonded. surfo end
+calc nsina = ?nsel
+if nsina .lt. @nna then
+    system 'echo the total number of oxidized O is unrealistic'
+    stop
+endif
+set slab = no
+if xypbc .eq. yes then
+    calc nnaint = int(@nna  / 2 ) * 2
+    if nnaint .ne. @nna then
+        calc nna = ( int (@nna / 2 )  + 1 ) * 2
+    endif
+    coor stat sele all end
+    calc refpos = ?zave
+    set slab = yes
+    set refv = dirz
+endif
+if xzpbc .eq. yes then
+    calc nnaint = int(@nna  / 2 )
+    if nnaint .ne. @nna then
+        calc nna = ( int (@nna / 2 )  + 1 ) * 2
+    endif
+    coor stat sele all end
+    calc refpos = ?yave
+    set slab = yes
+    set refv = diry
+endif
+if yzpbc .eq. yes then
+    calc nnaint = int(@nna  / 2 )
+    if nnaint .ne. @nna then
+        calc nna = ( int (@nna / 2 )  + 1 ) * 2
+    endif
+    coor stat sele all end
+    calc refpos = ?xave
+    set slab = yes
+    set refv = dirx
+endif
+
+if nsina .eq. @nna then
+    read sequence SOD @nna
+    generate SOD setup warn first none last none
+    coor set xdir 0 ydir 0 zdir 0 sele segid SOD end
+    calc isod = 1
+    calc rest = @noh - @nna
+    label pfdeloh
+       calc resi = @isod
+       define doxsi sele surfsi .subset. @resi end
+       define doxs sele type OS* .and. .bonded. doxsi end
+       calc nsingox = ?nsel
+       define doxd sele type OD* .and. .bonded. doxsi end
+       calc ndoubox = ?nsel
+       if nsingox .ne. 0 then
+          define doxs sele type OS* .and. .bonded. doxsi end
+          set oxtype = ?seltype
+          set segname = ?selsegi
+          set resi = ?selresi
+          define doxh sele type H* .and. .bonded. doxs end
+          calc nsingh = ?nsel
+          if nsingh .eq. 1 then
+              coor stat sele doxh end
+              calc x1 = ?xave
+              calc y1 = ?yave
+              calc z1 = ?zave
+              coor stat sele doxs end
+              calc x2 = ?xave
+              calc y2 = ?yave
+              calc z2 = ?zave
+              calc vx = ( @x1 - @x2 ) * 1.5 + @x2
+              calc vy = ( @y1 - @y2 ) * 1.5 + @y2
+              calc vz = ( @z1 - @z2 ) * 1.5 + @z2
+              patch @{oxtype}S @segname @resi setup warn
+              coor trans xdir @vx ydir @vy zdir @vz sele segid SOD .and. resid @isod end
+              incr isod by 1
+          endif
+       endif
+       if ndoubox .ne. 0 then
+          define doxd sele type OD* .and. .bonded. doxsi end
+          set oxtype = ?seltype
+          set segname = ?selsegi
+          set resi = ?selresi
+          define doxh sele type H* .and. .bonded. doxd end
+          calc ndoubh = ?nsel
+          calc subresi = 1
+          if ndoubh .eq. 2 then
+              !consider other direction because of close contact between SOD ions
+              label recalc
+              coor stat sele doxh .subset. @subresi end
+              calc x1 = ?xave
+              calc y1 = ?yave
+              calc z1 = ?zave
+              coor stat sele doxd end
+              calc x2 = ?xave
+              calc y2 = ?yave
+              calc z2 = ?zave
+              calc vx = ( @x1 - @x2 ) * 1.5 + @x2
+              calc vy = ( @y1 - @y2 ) * 1.5 + @y2
+              calc vz = ( @z1 - @z2 ) * 1.5 + @z2
+              coor trans xdir @vx ydir @vy zdir @vz sele segid SOD .and. resid @isod end
+              if isod .gt. 1 then
+                  define target sele segid SOD .and. resid @isod end
+                  coor mindist sele target end sele .not. target .and. segid SOD end
+                  if ?mind .le. 2 then
+                      calc subresi = 2
+                      coor set xdir 0 ydir 0 zdir 0 sele target end
+                      goto recalc
+                  endif
+              endif
+              patch @{oxtype}S @segname @resi setup warn
+              incr isod by 1
+          endif
+       endif
+       define surfoh sele type H* end
+       define surfo sele ( type OS* .or. type OD* ) .and. .bonded. surfoh end
+       define surfsi sele type SI* .and. .bonded. surfo end
+    if isod .le. @nna goto pfdeloh
+endif
+
+if nsina .gt. @nna then
+    read sequence SOD @nna
+    generate SOD setup warn first none last none
+    coor set xdir 0 ydir 0 zdir 0 sele segid SOD end
+    calc isod = 1
+    calc rest = @noh - @nna
+    calc upsod = 0
+    calc dwsod = 0
+    label deloh
+       RANDOM UNIFORM SCALE @nsina
+       calc resi = int ( ?random )
+       define doxsi sele surfsi .subset. @resi end
+       define doxs sele type OS* .and. .bonded. doxsi end
+       calc nsingox = ?nsel
+       define doxd sele type OD* .and. .bonded. doxsi end
+       calc ndoubox = ?nsel
+
+       if nsingox .ne. 0 then
+          define doxs sele type OS* .and. .bonded. doxsi end
+          set oxtype = ?seltype
+          set segname = ?selsegi
+          set resi = ?selresi
+          define doxh sele type H* .and. .bonded. doxs end
+          calc nsingh = ?nsel
+          if nsingh .eq. 1 then
+              coor stat sele doxh end
+              calc x1 = ?xave
+              calc y1 = ?yave
+              calc z1 = ?zave
+              coor stat sele doxs end
+              calc x2 = ?xave
+              calc y2 = ?yave
+              calc z2 = ?zave
+              calc vx = ( @x1 - @x2 ) * 1.5 + @x2
+              calc vy = ( @y1 - @y2 ) * 1.5 + @y2
+              calc vz = ( @z1 - @z2 ) * 1.5 + @z2
+              if slab .eq. yes then
+                  if refv .eq. dirx calc coord = @vx
+                  if refv .eq. diry calc coord = @vy
+                  if refv .eq. dirz calc coord = @vz
+                  if coord .gt. @refpos then
+                      calc upsod = @upsod + 1
+                      calc diff = abs( @upsod - @dwsod)
+                      if diff .ge. 2 then
+                          calc upsod = @upsod - 1
+                          goto deloh
+                      endif
+                  else
+                      calc dwsod = @dwsod + 1
+                      calc diff = abs( @upsod - @dwsod)
+                      if diff .ge. 2 then
+                          calc dwsod = @dwsod - 1
+                          goto deloh
+                      endif
+                  endif
+              endif
+              patch @{oxtype}S @segname @resi setup warn
+              coor trans xdir @vx ydir @vy zdir @vz sele segid SOD .and. resid @isod end
+              incr isod by 1
+          endif
+       endif
+       if ndoubox .ne. 0 then
+          define doxd sele type OD* .and. .bonded. doxsi end
+          set oxtype = ?seltype
+          set segname = ?selsegi
+          set resi = ?selresi
+          define doxh sele type H* .and. .bonded. doxd end
+          calc ndoubh = ?nsel
+          if ndoubh .eq. 2 then
+              coor stat sele doxh .subset. 1 end
+              calc x1 = ?xave
+              calc y1 = ?yave
+              calc z1 = ?zave
+              coor stat sele doxd end
+              calc x2 = ?xave
+              calc y2 = ?yave
+              calc z2 = ?zave
+              calc vx = ( @x1 - @x2 ) * 1.5 + @x2
+              calc vy = ( @y1 - @y2 ) * 1.5 + @y2
+              calc vz = ( @z1 - @z2 ) * 1.5 + @z2
+              if slab .eq. yes then
+                  if refv .eq. dirx calc coord = @vx
+                  if refv .eq. diry calc coord = @vy
+                  if refv .eq. dirz calc coord = @vz
+                  if coord .gt. @refpos then
+                      calc upsod = @upsod + 1
+                      calc diff = abs( @upsod - @dwsod)
+                      if diff .ge. 2 then
+                          calc upsod = @upsod - 1
+                          goto deloh
+                      endif
+                  else
+                      calc dwsod = @dwsod + 1
+                      calc diff = abs( @upsod - @dwsod)
+                      if diff .ge. 2 then
+                          calc dwsod = @dwsod - 1
+                          goto deloh
+                      endif
+                  endif
+              endif
+              patch @{oxtype}S @segname @resi setup warn
+              autogen angle dihedral
+              coor trans xdir @vx ydir @vy zdir @vz sele segid SOD .and. resid @isod end
+              incr isod by 1
+          endif
+       endif
+       define surfoh sele type H* end
+       define surfo sele ( type OS* .or. type OD* ) .and. .bonded. surfoh end
+       define surfsi sele type SI* .and. .bonded. surfo end
+       calc nsia = ?nsel
+       coor stat sele type H* end
+    if ?nsel .gt. @rest goto deloh
+endif
+if ionpnt .ne. 0 then
+   define sfsod sele segid SOD end
+   if ?nsel .gt. 0 then
+      join @type ?selsegi renumber
+   endif
+endif
+autogen angles dihedrals
+label escion
+

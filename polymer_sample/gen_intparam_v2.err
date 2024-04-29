@@ -1,0 +1,4 @@
+Traceback (most recent call last):
+  File "/home/charmm-gui/www/lib/polymer/gen_intparam_v2_ascii_tc.py", line 24, in <module>
+    polcha = json.load( open(args.polcha) )
+FileNotFoundError: [Errno 2] No such file or directory: '/home/charmm-gui/www/../data/www/1428802130/polcha.json'

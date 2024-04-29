@@ -1,0 +1,19 @@
+* information about system
+*
+
+set system = single
+set num_component = 1
+! chain
+set dilute = off
+set totmon_1 = 1
+set lcha_1 = 10
+set ncha_1 = 1
+! residue
+set rn1r1 = ETHY
+set tt1r1 = no
+set bbn1r1 = 2
+set s1r1p1 = H11
+set s1r1p2 = C1
+set s1r1p3 = C2
+! patch
+set p1t1n1 = P00544

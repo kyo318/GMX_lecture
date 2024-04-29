@@ -1,0 +1,1 @@
+{"systype":"vacuum","dimensions":["34.391","34.0384","41","90","90","90"],"input":["gromacs","openmm"],"forcefield":{"type":"c36m","files":["default"],"custom":[]},"nonbond_option":"10-12-fsw","hmr":false}

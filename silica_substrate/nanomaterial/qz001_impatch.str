@@ -1,0 +1,501 @@
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!-------------------------------XYZ-PBC------------------------------------!
+if xyzpbc .eq. yes then
+   !image patch XY
+   if ix .eq. @NX then                                   
+        if iy .eq. @NY then                              
+            calc jsum = @isum - ( ( @NX * @NY ) - 1 )    
+            impatch SIOD3 PRIM @type @isum  XY @type @jsum noautog
+        endif                                            
+   endif
+   !image patch A
+   if ix .eq. 1 then                                
+       calc jsum = @isum + ((@NX - 1) * @NY)        
+       impatch SIOX11 A @type @jsum PRIM @type @isum  noautog
+   endif
+   ! diagonalimage patch on A
+   if ix .eq. 1 then                                     
+       if iy .gt. 1 then                                 
+          calc jsum = @isum + ( ( @Nx - 1 ) * @Ny - 1 )  
+          impatch SIOD3 A @type @jsum  PRIM @type @isum noautog
+       endif
+   endif
+   ! diagonal image patch on A
+   if ix .eq. 1 then
+        if iz .gt. 1 then
+            calc jsum = @isum - @NY
+            impatch SIOZ2 A @type @jsum  PRIM @type @isum noautog
+        endif
+   endif
+   !image patch X
+   if ix .eq. @NX then                              
+       calc jsum = @isum - ((@NX - 1) * @NY)        
+       impatch SIOX11 PRIM @type @isum  X @type @jsum noautog
+   endif
+
+   !diagonal image patch between X and PRIM
+   if ix .eq. @Nx then
+      if iz .lt. @Nz then
+         calc jsum = @isum + @Ny
+         impatch SIOZ4 PRIM @type @isum X @type @jsum noautog
+      endif
+   endif
+
+   !diagonal image patch between Y and PRIM
+   if iy .eq. @Ny then
+      if ix .eq. @Nx then
+         if iz .lt. @Nz then
+            calc jsum = @isum + @Ny
+            impatch SIOZ4 PRIM @type @isum X @type @jsum noautog
+         endif
+      endif
+   endif
+   if iy .eq. 1 then                               
+       calc jsum = @isum + @NY - 1                 
+       impatch SIOY15 B @type @jsum  PRIM @type @isum noautog
+   endif                                           
+
+   if iy .eq. @NY then                             
+       calc jsum = @isum - ( @NY - 1 )             
+       impatch SIOY15 PRIM @type @isum  Y @type @jsum noautog
+   endif                                           
+
+   ! diagonalimage patch on Y                       !
+   if iy .eq. @Ny then                              
+       if ix .lt. @Nx then                          
+          calc jsum = @isum + 1                     
+          impatch SIOD3 PRIM @type @isum Y @type @jsum noautog
+       endif
+   endif
+
+   ! diagonalimage patch on B
+   if iy .eq. 1 then                                     
+       if ix .gt. 1 then                                 
+          calc jsum = @isum  - 1                         
+          impatch SIOD3 B @type @jsum  PRIM @type @isum noautog
+       endif
+   endif
+
+   ! image between C_image and PRIM, between AC_image and PRIM
+   if iz .eq. 1 then
+       if ix .eq. 1 then
+       calc jsum = @isum + (@NX * @NY * (@NZ-1))
+       calc ksum = @isum + (@NX * @NY * @NZ) - @NY
+       impatch SIOZ1 C @type @jsum  PRIM @type @isum noautog
+       impatch SIOZ3 C @type @jsum  PRIM @type @isum noautog
+       impatch SIOZ2 AC @type @ksum  PRIM @type @isum noautog
+       impatch SIOZ4 AC @type @ksum  PRIM @type @isum noautog
+       endif
+   endif
+
+   ! image between C_image and PRIM
+   if iz .eq. 1 then
+       if ix .ne. 1 then
+       calc jsum = @isum + (@NX * @NY * (@NZ-1))
+       calc ksum = @isum + (@NX * @NY * (@NZ-1)) - @NY
+       impatch SIOZ1 C @type @jsum  PRIM @type @isum noautog
+       impatch SIOZ3 C @type @jsum  PRIM @type @isum noautog
+       impatch SIOZ2 C @type @ksum  PRIM @type @isum noautog
+       impatch SIOZ4 C @type @ksum  PRIM @type @isum noautog
+       endif
+   endif
+
+   ! image between PRIM and Z_image
+   if iz .eq. @NZ then
+       if ix .ne. @NX then
+       calc jsum = @isum - (@NX * @NY * (@NZ-1))
+       calc ksum = @isum - (@NX * @NY * (@NZ-1)) + @NY
+       impatch SIOZ1 PRIM @type @isum  Z @type @jsum noautog
+       impatch SIOZ3 PRIM @type @isum  Z @type @jsum noautog
+       impatch SIOZ2 PRIM @type @isum  Z @type @ksum noautog
+       impatch SIOZ4 PRIM @type @isum  Z @type @ksum noautog
+       endif
+   endif
+
+   ! image between PRIM and Z_image, between PRIM and XZ_image
+   if iz .eq. @NZ then
+       if ix .eq. @NX then
+       calc jsum = @isum - (@NX * @NY * (@NZ-1))
+       calc ksum = @isum - (@NX * @NY * @NZ) + @NY
+       impatch SIOZ1 PRIM @type @isum  Z @type @jsum noautog
+       impatch SIOZ3 PRIM @type @isum  Z @type @jsum noautog
+       impatch SIOZ2 PRIM @type @isum  XZ @type @ksum noautog
+       impatch SIOZ4 PRIM @type @isum  XZ @type @ksum noautog
+       endif
+   endif
+endif
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!-------------------------------XY-PBC------------------------------------!
+if xypbc .eq. yes then
+   !image patch XY
+   if ix .eq. @NX then                                   
+        if iy .eq. @NY then                              
+            calc jsum = @isum - ( ( @NX * @NY ) - 1 )    
+            impatch SIOD3 PRIM @type @isum  XY @type @jsum noautog
+        endif                                            
+   endif                                                 
+   ! diagonal image patch AB
+   if ix .eq. 1 then
+      if iy .eq. 1 then
+         calc jsum = @isum + ( ( @NX * @NY ) - 1 )
+         impatch SIOD3 AB @type @jsum  PRIM @type @isum noautog
+      endif
+   endif
+   !image patch A
+   if ix .eq. 1 then                                
+       calc jsum = @isum + ((@NX - 1) * @NY)        
+       impatch SIOX11 A @type @jsum PRIM @type @isum noautog
+   endif
+
+   ! diagonalimage patch on A
+   if ix .eq. 1 then                                     
+       if iy .gt. 1 then                                 
+          calc jsum = @isum + ( ( @Nx - 1 ) * @Ny - 1 ) 
+          impatch SIOD3 A @type @jsum  PRIM @type @isum noautog
+       endif
+   endif
+
+   ! diagonal image patch on A
+   if ix .eq. 1 then
+        if iz .gt. 1 then
+            calc jsum = @isum - @NY
+            impatch SIOZ2 A @type @jsum  PRIM @type @isum noautog
+        endif
+   endif
+
+   !image patch X
+   if ix .eq. @NX then                              
+       calc jsum = @isum - ((@NX - 1) * @NY)        
+       impatch SIOX11 PRIM @type @isum  X @type @jsum noautog
+   endif
+
+   !diagonal image patch between X and PRIM
+   if ix .eq. @Nx then
+      if iz .lt. @Nz then
+         calc jsum = @isum + @Ny
+         impatch SIOZ4 PRIM @type @isum X @type @jsum noautog
+      endif
+   endif
+
+   !diagonal image patch between Y and PRIM
+   if iy .eq. @Ny then
+      if ix .eq. @Nx then
+         if iz .lt. @Nz then
+            calc jsum = @isum + @Ny
+            impatch SIOZ4 PRIM @type @isum X @type @jsum noautog
+         endif
+      endif
+   endif
+   if iy .eq. 1 then                               !
+       calc jsum = @isum + @NY - 1                 
+       impatch SIOY15 B @type @jsum  PRIM @type @isum noautog
+   endif                                           
+
+   if iy .eq. @NY then                             !
+       calc jsum = @isum - ( @NY - 1 )             
+       impatch SIOY15 PRIM @type @isum  Y @type @jsum noautog
+   endif                                           
+
+   ! diagonalimage patch on Y                       !
+   if iy .eq. @Ny then                              
+       if ix .lt. @Nx then                          
+          calc jsum = @isum + 1                     
+          impatch SIOD3 PRIM @type @isum Y @type @jsum noautog
+       endif
+   endif
+
+   ! diagonalimage patch on B
+   if iy .eq. 1 then                                     
+       if ix .gt. 1 then                                 
+          calc jsum = @isum  - 1                         
+          impatch SIOD3 B @type @jsum  PRIM @type @isum noautog
+       endif
+   endif
+endif
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!-------------------------------YZ-PBC------------------------------------!
+if yzpbc .eq. yes then
+   !diagonal image patch between Y and PRIM
+   if iy .eq. 1 then                               !
+       calc jsum = @isum + @NY - 1                 
+       impatch SIOY15 B @type @jsum  PRIM @type @isum noautog
+   endif                                           
+
+   if iy .eq. @NY then                             !
+       calc jsum = @isum - ( @NY - 1 )             
+       impatch SIOY15 PRIM @type @isum  Y @type @jsum noautog
+   endif                                           
+
+   ! diagonalimage patch on Y                       !
+   if iy .eq. @Ny then                              
+       if ix .lt. @Nx then                          
+          calc jsum = @isum + 1                     
+          impatch SIOD3 PRIM @type @isum Y @type @jsum noautog
+       endif
+   endif
+
+   ! diagonalimage patch on B
+   if iy .eq. 1 then                                    
+       if ix .gt. 1 then                                
+          calc jsum = @isum  - 1                        
+          impatch SIOD3 B @type @jsum  PRIM @type @isum noautog
+       endif
+   endif
+   ! image between C_image and PRIM, between AC_image and PRIM
+   if iz .eq. 1 then
+      if ix .eq. 1 then
+         calc jsum = @isum + (@NX * @NY * (@NZ-1))
+         calc ksum = @isum + (@NX * @NY * @NZ) - @NY
+         impatch SIOZ1 C @type @jsum  PRIM @type @isum noautog
+         impatch SIOZ3 C @type @jsum  PRIM @type @isum noautog
+         !if xpbc .eq. yes then
+         !   impatch SIOZ2 AC @type @ksum  PRIM @type @isum noautog
+         !   impatch SIOZ4 AC @type @ksum  PRIM @type @isum noautog
+         !endif
+      endif
+   endif
+   ! image between C_image and PRIM
+   if iz .eq. 1 then
+       if ix .ne. 1 then
+          calc jsum = @isum + (@NX * @NY * (@NZ-1))
+          calc ksum = @isum + (@NX * @NY * (@NZ-1)) - @NY
+          impatch SIOZ1 C @type @jsum  PRIM @type @isum noautog
+          impatch SIOZ3 C @type @jsum  PRIM @type @isum noautog
+          impatch SIOZ2 C @type @ksum  PRIM @type @isum noautog
+          impatch SIOZ4 C @type @ksum  PRIM @type @isum noautog
+       endif
+   endif
+   ! image between PRIM and Z_image
+   if iz .eq. @NZ then
+       if ix .ne. @NX then
+       calc jsum = @isum - (@NX * @NY * (@NZ-1))
+       calc ksum = @isum - (@NX * @NY * (@NZ-1)) + @NY
+       impatch SIOZ1 PRIM @type @isum  Z @type @jsum noautog
+       impatch SIOZ3 PRIM @type @isum  Z @type @jsum noautog
+       impatch SIOZ2 PRIM @type @isum  Z @type @ksum noautog
+       impatch SIOZ4 PRIM @type @isum  Z @type @ksum noautog
+       endif
+   endif
+   ! image between PRIM and Z_image, between PRIM and XZ_image
+   if iz .eq. @NZ then
+       if ix .eq. @NX then
+          calc jsum = @isum - (@NX * @NY * (@NZ-1))
+          calc ksum = @isum - (@NX * @NY * @NZ) + @NY
+          impatch SIOZ1 PRIM @type @isum  Z @type @jsum noautog
+          impatch SIOZ3 PRIM @type @isum  Z @type @jsum noautog
+          !if xpbc .eq. yes then
+          !   impatch SIOZ2 PRIM @type @isum  XZ @type @ksum noautog
+          !   impatch SIOZ4 PRIM @type @isum  XZ @type @ksum noautog
+          !endif
+        endif
+   endif
+endif
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!-------------------------------XZ-PBC------------------------------------!
+if xzpbc .eq. yes then
+   !image patch A
+   if ix .eq. 1 then                                
+       calc jsum = @isum + ((@NX - 1) * @NY)        
+       impatch SIOX11 A @type @jsum PRIM @type @isum noautog
+   endif
+   ! diagonalimage patch on A
+   if ix .eq. 1 then                                   
+       if iy .gt. 1 then                               
+          calc jsum = @isum + ( ( @Nx - 1 ) * @Ny - 1 )
+          impatch SIOD3 A @type @jsum  PRIM @type @isum noautog
+       endif
+   endif
+   ! diagonal image patch on A
+   if ix .eq. 1 then
+        if iz .gt. 1 then
+            calc jsum = @isum - @NY
+            impatch SIOZ2 A @type @jsum  PRIM @type @isum noautog
+        endif
+   endif
+   !image patch X
+   if ix .eq. @NX then                             
+       calc jsum = @isum - ((@NX - 1) * @NY)        
+       impatch SIOX11 PRIM @type @isum  X @type @jsum noautog
+   endif
+   !diagonal image patch between X and PRIM
+   if ix .eq. @Nx then
+      if iz .lt. @Nz then
+         calc jsum = @isum + @Ny
+         impatch SIOZ4 PRIM @type @isum X @type @jsum noautog
+      endif
+   endif
+   ! image between C_image and PRIM, between AC_image and PRIM
+   if iz .eq. 1 then
+      if ix .eq. 1 then
+         calc jsum = @isum + (@NX * @NY * (@NZ-1))
+         calc ksum = @isum + (@NX * @NY * @NZ) - @NY
+         impatch SIOZ1 C @type @jsum  PRIM @type @isum noautog
+         impatch SIOZ3 C @type @jsum  PRIM @type @isum noautog
+         impatch SIOZ2 AC @type @ksum  PRIM @type @isum noautog
+         impatch SIOZ4 AC @type @ksum  PRIM @type @isum noautog
+      endif
+   endif
+   ! image between C_image and PRIM
+   if iz .eq. 1 then
+       if ix .ne. 1 then
+          calc jsum = @isum + (@NX * @NY * (@NZ-1))
+          calc ksum = @isum + (@NX * @NY * (@NZ-1)) - @NY
+          impatch SIOZ1 C @type @jsum  PRIM @type @isum noautog
+          impatch SIOZ3 C @type @jsum  PRIM @type @isum noautog
+          impatch SIOZ2 C @type @ksum  PRIM @type @isum noautog
+          impatch SIOZ4 C @type @ksum  PRIM @type @isum noautog
+       endif
+   endif
+   ! image between PRIM and Z_image
+   if iz .eq. @NZ then
+       if ix .ne. @NX then
+       calc jsum = @isum - (@NX * @NY * (@NZ-1))
+       calc ksum = @isum - (@NX * @NY * (@NZ-1)) + @NY
+       impatch SIOZ1 PRIM @type @isum  Z @type @jsum noautog
+       impatch SIOZ3 PRIM @type @isum  Z @type @jsum noautog
+       impatch SIOZ2 PRIM @type @isum  Z @type @ksum noautog
+       impatch SIOZ4 PRIM @type @isum  Z @type @ksum noautog
+       endif
+   endif
+   ! image between PRIM and Z_image, between PRIM and XZ_image
+   if iz .eq. @NZ then
+       if ix .eq. @NX then
+          calc jsum = @isum - (@NX * @NY * (@NZ-1))
+          calc ksum = @isum - (@NX * @NY * @NZ) + @NY
+          impatch SIOZ1 PRIM @type @isum  Z @type @jsum noautog
+          impatch SIOZ3 PRIM @type @isum  Z @type @jsum noautog
+          impatch SIOZ2 PRIM @type @isum  XZ @type @ksum noautog
+          impatch SIOZ4 PRIM @type @isum  XZ @type @ksum noautog
+        endif
+   endif
+endif
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!-------------------------------X-PBC------------------------------------!
+
+if xpbc .eq. yes then
+   if ix .eq. 1 then                                
+       calc jsum = @isum + ((@NX - 1) * @NY)        
+       impatch SIOX11 A @type @jsum PRIM @type @isum noautog
+   endif
+
+   if ix .eq. @NX then                              
+       calc jsum = @isum - ((@NX - 1) * @NY)        
+       impatch SIOX11 PRIM @type @isum  X @type @jsum noautog
+   endif
+
+   ! diagonalimage patch on A
+   if ix .eq. 1 then                                    
+       if iy .gt. 1 then                                
+          calc jsum = @isum + ( ( @Nx - 1 ) * @Ny - 1 ) 
+          impatch SIOD3 A @type @jsum  PRIM @type @isum noautog
+       endif
+   endif
+
+   ! diagonal image patch on A
+   if ix .eq. 1 then
+        if iz .gt. 1 then
+            calc jsum = @isum - @NY
+            impatch SIOZ2 A @type @jsum  PRIM @type @isum noautog
+        endif
+   endif
+
+   !diagonal image patch between X and PRIM
+   if ix .eq. @Nx then
+      if iz .lt. @Nz then
+         calc jsum = @isum + @Ny
+         impatch SIOZ4 PRIM @type @isum X @type @jsum noautog
+      endif
+   endif
+   !diagonal image patch between Y and PRIM
+   if iy .eq. @Ny then
+      if ix .eq. @Nx then
+         if iz .lt. @Nz then
+            calc jsum = @isum + @Ny
+            impatch SIOZ4 PRIM @type @isum X @type @jsum noautog
+         endif
+      endif
+   endif
+endif
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!-------------------------------Y-PBC------------------------------------!
+if ypbc .eq. yes then
+   if iy .eq. 1 then                               !
+       calc jsum = @isum + @NY - 1                 
+       impatch SIOY15 B @type @jsum  PRIM @type @isum noautog
+   endif                                           
+
+   if iy .eq. @NY then                             !
+       calc jsum = @isum - ( @NY - 1 )             
+       impatch SIOY15 PRIM @type @isum  Y @type @jsum noautog
+   endif                                           
+
+   ! diagonalimage patch on Y                       !
+   if iy .eq. @Ny then                              
+       if ix .lt. @Nx then                          
+          calc jsum = @isum + 1                     
+          impatch SIOD3 PRIM @type @isum Y @type @jsum noautog
+       endif
+   endif
+
+   ! diagonalimage patch on B
+   if iy .eq. 1 then                                    
+       if ix .gt. 1 then                                
+          calc jsum = @isum  - 1                        
+          impatch SIOD3 B @type @jsum  PRIM @type @isum noautog
+       endif
+   endif
+endif
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!-------------------------------Z-PBC------------------------------------!
+
+if zpbc .eq. yes then
+   ! image between C_image and PRIM
+   if iz .eq. 1 then
+       if ix .ne. 1 then
+          calc jsum = @isum + (@NX * @NY * (@NZ-1))
+          calc ksum = @isum + (@NX * @NY * (@NZ-1)) - @NY
+          impatch SIOZ1 C @type @jsum  PRIM @type @isum noautog
+          impatch SIOZ3 C @type @jsum  PRIM @type @isum noautog
+          impatch SIOZ2 C @type @ksum  PRIM @type @isum noautog
+          impatch SIOZ4 C @type @ksum  PRIM @type @isum noautog
+       endif
+   endif
+   ! image between PRIM and Z_image
+   if iz .eq. @NZ then
+       if ix .ne. @NX then
+       calc jsum = @isum - (@NX * @NY * (@NZ-1))
+       calc ksum = @isum - (@NX * @NY * (@NZ-1)) + @NY
+       impatch SIOZ1 PRIM @type @isum  Z @type @jsum noautog
+       impatch SIOZ3 PRIM @type @isum  Z @type @jsum noautog
+       impatch SIOZ2 PRIM @type @isum  Z @type @ksum noautog
+       impatch SIOZ4 PRIM @type @isum  Z @type @ksum noautog
+       endif
+   endif
+   ! image between PRIM and Z_image, between PRIM and XZ_image
+   if iz .eq. @NZ then
+       if ix .eq. @NX then
+          calc jsum = @isum - (@NX * @NY * (@NZ-1))
+          calc ksum = @isum - (@NX * @NY * @NZ) + @NY
+          impatch SIOZ1 PRIM @type @isum  Z @type @jsum noautog
+          impatch SIOZ3 PRIM @type @isum  Z @type @jsum noautog
+        endif
+   endif
+endif
+
+
+if ix .eq. @Nx then
+    if iy .eq. @Ny then
+        if iz .eq. @Nz then
+            impatch FKIMP PRIM @type @isum PRIM @type @jsum 
+        endif
+    endif
+endif
+

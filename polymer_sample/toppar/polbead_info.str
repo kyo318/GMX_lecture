@@ -1,0 +1,9 @@
+* TOPOLOGY AND PARAMETERS FOR A BIG-SPHERE (POL)
+*
+set nsphe_1 = 0
+set P1F1 = A
+set P1F2 = B
+set rad = 0
+set rmin2 = 0.000
+set nmon_11 = 0
+set nmon_12 = 0

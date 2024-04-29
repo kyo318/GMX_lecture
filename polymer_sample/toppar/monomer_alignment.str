@@ -1,0 +1,50 @@
+* rotation of the last C-C vector
+*
+
+! calculate the cross product between two vectors [vec1 and vec2] to define a rotation axis
+! 
+calc xrot = @{yvec1} * @{zvec2} - @{zvec1} * @{yvec2}
+calc yrot = @{zvec1} * @{xvec2} - @{xvec1} * @{zvec2}
+calc zrot = @{xvec1} * @{yvec2} - @{yvec1} * @{xvec2}
+
+! normalization
+!
+calc norm = sqrt ( @{xrot} * @{xrot} + @{yrot} * @{yrot} + @{zrot} * @{zrot} ) 
+calc xrot = @{xrot} / @{norm}
+calc yrot = @{yrot} / @{norm}
+calc zrot = @{zrot} / @{norm}
+
+! rotation angle
+!
+calc dotp  = @{xvec1} * @{xvec2} + @{yvec1} * @{yvec2} + @{zvec1} * @{zvec2} 
+calc theta = acos ( @dotp )
+
+!if zref .gt. 0 calc theta = - @theta + ?pi
+!if zref .lt. 0 calc theta = - @theta
+
+! now calculate rotation matrix
+!
+calc sint  = sin( @{theta} ) 
+calc cost  = cos( @{theta} ) 
+calc tcost =  1 - @{cost}
+
+calc R11 = @{tcost} * @{xrot} * @{xrot} + @{cost}
+calc R12 = @{tcost} * @{xrot} * @{yrot} - @{sint} * @{zrot} 
+calc R13 = @{tcost} * @{xrot} * @{zrot} + @{sint} * @{yrot} 
+
+calc R21 = @{tcost} * @{xrot} * @{yrot} + @{sint} * @{zrot}
+calc R22 = @{tcost} * @{yrot} * @{yrot} + @{cost} 
+calc R23 = @{tcost} * @{yrot} * @{zrot} - @{sint} * @{xrot} 
+
+calc R31 = @{tcost} * @{xrot} * @{zrot} - @{sint} * @{yrot}
+calc R32 = @{tcost} * @{yrot} * @{zrot} + @{sint} * @{xrot} 
+calc R33 = @{tcost} * @{zrot} * @{zrot} + @{cost}
+
+! rotate the lipid molecule
+!
+coor rotate Matrix select .not. POLB end 
+     @R11 @R12 @R13
+     @R21 @R22 @R23
+     @R31 @R32 @R33
+
+return

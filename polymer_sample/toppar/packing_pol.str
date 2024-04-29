@@ -1,0 +1,28 @@
+* TOPOLOGY AND PARAMETERS FOR A BIG-SPHERE (POL)
+*
+
+read rtf card append
+* rtf for POL
+*
+31  1
+
+END
+
+read para card append flex
+* para for Beads
+*
+
+ATOM
+
+BONDS
+
+ANGLES
+
+DIHEDRALS
+
+NONBONDED nbxmod 2 atom cdiel shift vatom vdistance vswitch -
+cutnb 38 ctofnb 36 ctonnb 34 eps 80.0 e14fac 1.0 wmin 1.5
+
+NBFIX
+
+END

@@ -1,0 +1,86 @@
+if xypbc .eq. yes then !capping z direction
+   if iz .eq. 1 then
+      patch QZZS1 @type @isum setup warn
+   endif
+endif
+
+if yzpbc .eq. yes then !capping x direction
+   if ix .eq. 1 then
+      patch QZXS1 @type @isum setup warn
+   endif
+   if ix .eq. @Nx then
+      calc jsum = @isum - @Ny
+      patch QZXSN @type @isum setup warn !add SI in ix = Nx
+      patch QZXSN2 @type @jsum setup warn
+   endif
+endif
+
+if xzpbc .eq. yes then !capping y direction
+   if iy .eq. @Ny then !add SIO2H2
+      patch QZYSN @type @isum setup warn
+   endif
+endif
+
+
+if zpbc .eq. yes then
+   if iy .eq. @Ny then !add SIO2H2
+      patch QZYSN @type @isum setup warn
+   endif
+   if ix .eq. 1 then
+      patch QZXS1 @type @isum setup warn
+   endif
+   if ix .eq. @Nx then
+      patch QZXSN @type @isum setup warn !add SI in ix = Nx
+      calc jsum = @isum - @Ny
+      patch QZXSN2 @type @jsum setup warn
+   endif
+endif
+
+if xpbc .eq. yes then
+   if iy .eq. @Ny then
+      patch QZYSN @type @isum setup warn
+   endif
+   if iz .eq. 1 then
+      patch QZZS1 @type @isum setup warn
+   endif
+endif
+
+if ypbc .eq. yes then
+   if ix .eq. 1 then
+      patch QZXS1 @type @isum setup warn
+   endif
+   if ix .eq. @Nx then
+      calc jsum = @isum - @Ny
+      patch QZXSN @type @isum setup warn !add SI in ix = Nx
+      patch QZXSN2 @type @jsum setup warn
+   endif
+   if iz .eq. 1 then
+      patch QZZS12 @type @isum setup warn
+   endif
+   if iz .eq. @Nz then
+      patch QZZSN2 @type @isum setup warn
+   endif
+endif
+
+if pbc .eq. no then
+   if iz .eq. 1 then
+      patch QZZS12 @type @isum setup warn
+   endif
+   if iz .eq. @Nz then
+      patch QZZSN2 @type @isum setup warn
+   endif
+   if iy .eq. @Ny then
+      patch QZYSN @type @isum setup warn
+   endif
+   if ix .eq. 1 then
+      patch QZXS1 @type @isum setup warn
+   endif
+   if ix .eq. @Nx then
+      patch QZXSN @type @isum setup warn !add SI in ix = Nx
+      calc jsum = @isum - @Ny
+      if iy .lt. @Ny then
+         patch QZXSN2 @type @jsum setup warn
+      endif
+   endif
+endif
+

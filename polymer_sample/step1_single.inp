@@ -1,0 +1,182 @@
+* READ PDB, MANIPULATE STRUCTURE IF NEEDED, AND GENERATE TOPOLOGY FILE
+*
+
+DIMENS CHSIZE 5000000 MAXRES 3000000
+
+! Read topology and parameter files
+stream toppar.str
+
+stream polymer.step0.str
+
+! Stores radius of all uploaded structures
+open write card unit 86 name mass.str
+
+calc this_struct = 1
+
+label struct_info1
+   stream psfcrdreader/p@{this_struct}_raw.str
+   calc imon = 1
+   set fname = P@{this_struct}
+   coor stat sele segid @fname end
+   calc resnum = ?nres
+   if resnum .eq. 1 then
+       set s1 = @{s@@{this_struct}r1p1}
+       set s2 = @{s@@{this_struct}r1p2}
+       set s3 = @{s@@{this_struct}r1p3}
+       goto escpatch
+   endif
+   autogen off
+   label do_patch
+      calc jmon = @imon + 1
+      define ires sele segid @fname .and. resid @imon end
+      set iname = ?selresn
+      define ires sele segid @fname .and. resid @jmon end
+      set jname = ?selresn
+      calc i = 1
+      label idxpat
+         if iname .eq. @{rn@@{this_struct}r@{i}} then set iidx = @i
+         if jname .eq. @{rn@@{this_struct}r@{i}} then set jidx = @i
+      incr i by 1
+      if i .le. @{totmon_@@{this_struct}} goto idxpat
+      if imon .eq. 1 then
+         set s1 = @{s@@{this_struct}r@@{iidx}p1}
+         set s2 = @{s@@{this_struct}r@@{iidx}p2}
+         set s3 = @{s@@{this_struct}r@@{iidx}p3}
+      endif
+      set pname = @{p@@{this_struct}t@@{iidx}n@@{jidx}}
+      patch @pname @fname @imon @fname @jmon setup warn
+      incr imon by 1
+   if imon .lt. @{lcha_@@{this_struct}} then goto do_patch
+   label escpatch
+   autogenerate angles dihedrals
+   ic param
+   ic seed @fname 1 @s1 @fname 1 @s2 @fname 1 @s3
+   ic build
+   if resnum .eq. 1 goto escadj
+   if system .ne. single goto escadj
+   open write card unit 10 name temp.pdb
+   write coor pdb unit 10
+   open write card unit 10 name temp.crd
+   write coor  unit 10 card
+   open write card unit 10 name temp.psf
+   write psf unit 10 card
+
+   define target sele resid 1 .and. type @s3 end
+   define bondedat sele .bonded. target .and. .not. (resid 1 .and. type @s2) end
+   calc ns4tot = ?nsel
+   calc icnt = 1
+   label finds4
+       coor stat sele bondedat .subset. @icnt end
+       set atname = ?seltype
+       set resnum = ?selresi
+       set s4t@{icnt} = @atname
+       set s4r@{icnt} = @resnum
+       quick 1 @s1 1 @s2 1 @s3 @resnum @atname
+       calc s4phi@{icnt} = ?phi
+       incr icnt by 1
+   if icnt .le. @ns4tot then goto finds4
+   dele atoms sele all end
+
+   open read card unit 10 name temp.psf
+   read psf unit 10 card append
+   open read card unit 10 name temp.crd
+   read coor  unit 10 card append
+   ic generate
+   ic fill
+   calc imon = 1
+   calc endmon = @{lcha_@@{this_struct}} - 2
+   if endmon .ge. 1 then
+      label assignic
+         calc jmon = @imon + 1
+         calc kmon = @jmon + 1
+         define ires sele segid @fname .and. resid @imon end
+         set iname = ?selresn
+         define ires sele segid @fname .and. resid @jmon end
+         set jname = ?selresn
+         define ires sele segid @fname .and. resid @jmon end
+         set kname = ?selresn
+         calc i = 1
+         label idxbb
+            if iname .eq. @{rn@@{this_struct}r@@{i}} set iidx = @i
+            if jname .eq. @{rn@@{this_struct}r@@{i}} set jidx = @i
+            if kname .eq. @{rn@@{this_struct}r@@{i}} set kidx = @i
+         incr i by 1
+         if i .le. @{totmon_@@{this_struct}} goto idxbb
+         calc bbi = @{bbn@@{this_struct}r@@{iidx}}
+         calc bbj = @{bbn@@{this_struct}r@@{jidx}}
+         calc bbk = @{bbn@@{this_struct}r@@{kidx}}
+         calc bbsum = @bbi + @bbj + @bbk 
+         if bbsum .eq. 6 then  
+            ic edit
+               angle @imon c1 @imon c2 @jmon c1 110.0
+               angle @imon c2 @jmon c1 @jmon c2 110.0
+               dihe @imon c2 @jmon c1 @jmon c2 @kmon c1 180
+            end
+         endif
+         incr imon by 1
+      if imon .le. @endmon goto assignic
+   endif
+   coor init sele all end
+   ic print
+   calc icnt = 1
+   label icedits4
+       set resi = @{s4r@@{icnt}}
+       set atname = @{s4t@@{icnt}}
+       set dihang = @{s4phi@@{icnt}}
+       ic edit
+           angle 1 @s1 1 @s2 1 @s3 110
+           dihe  1 @s1 1 @s2 1 @s3 @resi @atname @dihang
+       end
+   incr icnt by 1
+   if icnt .le. @ns4tot then goto icedits4
+   ic seed @fname 1 @s1 @fname 1 @s2 @fname 1 @s3
+   ic build
+   coor orient sele segid @fname end
+
+   label escadj
+   calc mtype = 1
+   label gentmass
+      calc mass_@{this_struct}r@{mtype} = 0
+      incr mtype by 1
+   if mtype .le. @{totmon_@@{this_struct}} goto gentmass
+   calc imon = 1
+   label typemass
+      coor stat mass sele segid @{fname} .and. resid @imon end
+      calc tempmass = ?mass
+      set iname = ?selresn
+      calc i = 1
+      label idxmass
+         if iname .eq. @{rn@@{this_struct}r@@{i}} then set iidx = @i
+      incr i by 1
+      if i .le. @{totmon_@@{this_struct}} goto idxmass
+
+      calc mass_@{this_struct}r@{iidx} = @{mass_@@{this_struct}r@@{iidx}} + @tempmass
+      incr imon by 1
+   if imon .lt. @{lcha_@@{this_struct}} goto typemass
+
+   nbonds atom switch cdie vdw vswitch  -
+          ctonnb 12 ctofnb 12 cutnb 14 cutim 16 -
+          inbfrq -1 imgfrq -1 wmin 1.0 cdie eps 80.0
+   mini sd   nstep 500 nprint 100
+   open write card unit 10 name psfcrdreader/@{fname}_raw.pdb
+   write coor pdb  unit 10
+   open write card unit 10 name psfcrdreader/@{fname}_raw.crd
+   write coor  unit 10 card
+   open write card unit 10 name psfcrdreader/@{fname}_raw.psf
+   write psf unit 10 card
+   delete atoms sele segid @fname end
+
+   calc type = 1
+   label writeminfo
+      write title unit 86
+      * set mass@{this_struct}r@{type} = @{mass_@@{this_struct}r@@{type}}
+      *
+      incr type by 1
+   if type .le. @{totmon_@@{this_struct}} goto writeminfo
+   !delete atoms select all end
+
+incr this_struct by 1
+if this_struct .le. @{num_component} goto struct_info1
+system "rm temp.psf temp.crd temp.pdb"
+
+STOP
